@@ -205,9 +205,10 @@ void check_mem_leak(void)
 }
 
 
+#define KB_SIZE 1024
+
 void QMPOOL_TEST_1(void)
 {
-#define KB_SIZE 1024
     char *p1, *p2, *p3;
 
     p1 = (char *)Qmalloc(KB_SIZE);
@@ -232,6 +233,39 @@ void QMPOOL_TEST_1(void)
     Qfree(p1);
 }
 
+void QMPOOL_TEST_2(void)
+{
+    char *p1, *p2, *p3, *p4, *p5;
+
+    p1 = (char *)Qmalloc(2 * KB_SIZE);
+    p2 = (char *)Qmalloc(KB_SIZE);
+
+    memset(p1, '1', 2 * KB_SIZE - 1);   p1[2 * KB_SIZE] = '\0';
+    memset(p2, '2', KB_SIZE - 1);       p2[KB_SIZE] = '\0';
+
+    printf("p1: %s\n", p1);
+    printf("p2: %s\n", p2);
+
+    Qfree(p1);
+
+    p3 = (char *)Qmalloc(KB_SIZE);
+    p4 = (char *)Qmalloc(KB_SIZE);
+    p5 = (char *)Qmalloc(KB_SIZE);
+
+    memset(p3, '3', KB_SIZE - 1);       p3[KB_SIZE] = '\0';
+    memset(p4, '4', KB_SIZE - 1);       p4[KB_SIZE] = '\0';
+    memset(p5, '5', KB_SIZE - 1);       p5[KB_SIZE] = '\0';
+
+    printf("p3: %s\n", p3);
+    printf("p4: %s\n", p4);
+    printf("p5: %s\n", p5);
+
+    Qfree(p5);
+    Qfree(p4);
+    Qfree(p3);
+    Qfree(p2);
+}
+
 int main(void)
 {
     if (Qmmap_init("/qmempool_mmap", 100 * 1024 * 1024)) { // 100M
@@ -241,6 +275,8 @@ int main(void)
 
 
     QMPOOL_TEST_1();
+
+    QMPOOL_TEST_2();
 
 
     check_mem_leak();
